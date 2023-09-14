@@ -22,9 +22,9 @@ if (Test-Path $csvPath) {
         $logonName = ($firstName.Substring(0, 1) + $lastName) -replace '\W'
 
         # Define the target OU based on the location
-        $ouPath = "OU=Employees Eindhoven,DC=CDB,DC=lan"
+        $ouPath = "OU=Employees Eindhoven,OU=Employees,DC=CDB,DC=lan"
         if ($location -eq "Tilburg") {
-            $ouPath = "OU=Employees Tilburg,DC=CDB,DC=lan"
+            $ouPath = "OU=Employees Tilburg,OU=Employees,DC=CDB,DC=lan"
         }
 
         # Check if the user already exists
