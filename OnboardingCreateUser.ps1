@@ -21,23 +21,25 @@ if (Test-Path $csvPath) {
         $location = $user.Location
         $password = $user.Password  # Password from the CSV
 
+        # Generate the user logon name as first letter of first name + entire last name without spaces or special characters
+        $logonName = ($firstName.Substring(0, 1) + $lastName) -replace '\W'
+
         # Check if the user already exists
-        $existingUser = Get-ADUser -Filter { (GivenName -eq $firstName) -and (Surname -eq $lastName) } -ErrorAction SilentlyContinue
+        $existingUser = Get-ADUser -Filter { (SamAccountName -eq $logonName) } -ErrorAction SilentlyContinue
 
         if ($existingUser -eq $null) {
             # Create a new user in Active Directory in the specified OU with a temporary password
             try {
-                New-ADUser -Name "$firstName $lastName" -GivenName $firstName -Surname $lastName -UserPrincipalName "$firstName.$lastName@CDB.lan" -SamAccountName $firstName -Enabled $true -Path $ouPath -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) -ErrorAction Stop
+                New-ADUser -Name "$firstName $lastName" -GivenName $firstName -Surname $lastName -UserPrincipalName "$logonName@CDB.lan" -SamAccountName $logonName -Enabled $true -Path $ouPath -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) -ErrorAction Stop
 
                 # Set additional user attributes
-                Set-ADUser -Identity $firstName -Description $function -Department $department -Office $location -ErrorAction Stop
+                Set-ADUser -Identity $logonName -Description $function -Department $department -Office $location -ErrorAction Stop
             } catch {
                 # Handle errors as needed
             }
 
             # Enable the account using SamAccountName
-            Enable-ADAccount -Identity $firstName
+            Enable-ADAccount -Identity $logonName
         }
     }
-}
-
+} 
