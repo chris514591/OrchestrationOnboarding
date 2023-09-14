@@ -19,7 +19,7 @@ if (Test-Path $csvPath) {
         $function = $user.Function
         $department = $user.Department
         $location = $user.Location
-        $password = $user.Password  # Password from the CSV
+        $password = $user.Password
 
         # Generate the user logon name as first letter of first name + entire last name without spaces or special characters
         $logonName = ($firstName.Substring(0, 1) + $lastName) -replace '\W'
