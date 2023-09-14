@@ -4,9 +4,6 @@ Import-Module ActiveDirectory
 # Define the path to the CSV file containing user information
 $csvPath = "S:\Fileshare\HR\NewHires.csv"
 
-# Define the target OU where you want to create users
-$ouPath = "OU=TestOU,DC=CDB,DC=lan"
-
 # Check if the CSV file exists
 if (Test-Path $csvPath) {
     # Read the CSV file
@@ -20,9 +17,15 @@ if (Test-Path $csvPath) {
         $department = $user.Department
         $location = $user.Location
         $password = $user.Password
-        
+
         # Generate the user logon name as first letter of first name + entire last name without symbols or spaces
         $logonName = ($firstName.Substring(0, 1) + $lastName) -replace '\W'
+
+        # Define the target OU based on the location
+        $ouPath = "OU=Employees Eindhoven,DC=CDB,DC=lan"
+        if ($location -eq "Tilburg") {
+            $ouPath = "OU=Employees Tilburg,DC=CDB,DC=lan"
+        }
 
         # Check if the user already exists
         $existingUser = Get-ADUser -Filter { (SamAccountName -eq $logonName) } -ErrorAction SilentlyContinue
