@@ -27,18 +27,22 @@ if (Test-Path $csvPath) {
         if ($existingUser -eq $null) {
             # Create a new user in Active Directory in the specified OU with a temporary password
             try {
-                New-ADUser -Name "$firstName $lastName" -GivenName $firstName -Surname $lastName -UserPrincipalName "$firstName.$lastName@CDB.lan" -SamAccountName $firstName -Enabled $false -Path $ouPath -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) -ErrorAction Stop
+                New-ADUser -Name "$firstName $lastName" -GivenName $firstName -Surname $lastName -UserPrincipalName "$firstName.$lastName@CDB.lan" -SamAccountName $firstName -Enabled $true -Path $ouPath -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) -ErrorAction Stop
 
                 # Set additional user attributes
                 Set-ADUser -Identity "$firstName $lastName" -Description $function -Department $department -Office $location -ErrorAction Stop
             } catch {
-                Write-Host "Error creating user '$firstName $lastName': $_"
+                # Handle errors as needed
             }
 
             # Enable the account
             Enable-ADAccount -Identity "$firstName $lastName"
-        } else {
-            Write-Host "User '$firstName $lastName' already exists. Skipping creation."
         }
     }
 
+    # Optionally, you can display a message indicating completion
+    # Write-Host "User creation/update completed."
+} else {
+    # Optionally, you can display a message if the CSV file is not found
+    # Write-Host "CSV file not found at $csvPath"
+}
