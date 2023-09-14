@@ -31,23 +31,14 @@ if (Test-Path $csvPath) {
 
                 # Set additional user attributes
                 Set-ADUser -Identity "$firstName $lastName" -Description $function -Department $department -Office $location -ErrorAction Stop
-
-                # Enable the account
-                Set-ADUser -Identity "$firstName $lastName" -Enabled $true -ErrorAction Stop
-
-                # Force the user to change their password at next logon
-                Set-ADUser -Identity "$firstName $lastName" -ChangePasswordAtLogon $true -ErrorAction Stop
-
-                Write-Host "User '$firstName $lastName' created in $ouPath with a temporary password. Account enabled."
             } catch {
                 Write-Host "Error creating user '$firstName $lastName': $_"
             }
+
+            # Enable the account
+            Enable-ADAccount -Identity "$firstName $lastName"
         } else {
             Write-Host "User '$firstName $lastName' already exists. Skipping creation."
         }
     }
 
-    Write-Host "User creation/update completed."
-} else {
-    Write-Host "CSV file not found at $csvPath"
-}
