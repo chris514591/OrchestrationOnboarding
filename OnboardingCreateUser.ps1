@@ -30,19 +30,14 @@ if (Test-Path $csvPath) {
                 New-ADUser -Name "$firstName $lastName" -GivenName $firstName -Surname $lastName -UserPrincipalName "$firstName.$lastName@CDB.lan" -SamAccountName $firstName -Enabled $true -Path $ouPath -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) -ErrorAction Stop
 
                 # Set additional user attributes
-                Set-ADUser -Identity "$firstName $lastName" -Description $function -Department $department -Office $location -ErrorAction Stop
+                Set-ADUser -Identity $firstName -Description $function -Department $department -Office $location -ErrorAction Stop
             } catch {
                 # Handle errors as needed
             }
 
-            # Enable the account
-            Enable-ADAccount -Identity "$firstName $lastName"
+            # Enable the account using SamAccountName
+            Enable-ADAccount -Identity $firstName
         }
     }
-
-    # Optionally, you can display a message indicating completion
-    # Write-Host "User creation/update completed."
-} else {
-    # Optionally, you can display a message if the CSV file is not found
-    # Write-Host "CSV file not found at $csvPath"
 }
+
