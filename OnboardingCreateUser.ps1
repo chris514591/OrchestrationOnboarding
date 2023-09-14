@@ -19,9 +19,9 @@ if (Test-Path $csvPath) {
         $function = $user.Function
         $department = $user.Department
         $location = $user.Location
-        $password = $user.Password
+        $password = $user.Password  # Password from the CSV
 
-        # Generate the user logon name as first letter of first name + entire last name without spaces or special characters
+        # Generate the user logon name as first letter of first name + entire last name without symbols or spaces
         $logonName = ($firstName.Substring(0, 1) + $lastName) -replace '\W'
 
         # Check if the user already exists
@@ -40,6 +40,9 @@ if (Test-Path $csvPath) {
 
             # Enable the account using SamAccountName
             Enable-ADAccount -Identity $logonName
+
+            # Set the pre-Windows 2000 logon name to match the user logon name
+            Set-ADUser -Identity $logonName -SamAccountName $logonName -ErrorAction Stop
         }
     }
-} 
+}
