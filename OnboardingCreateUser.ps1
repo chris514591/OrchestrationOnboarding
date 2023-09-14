@@ -25,14 +25,20 @@ if (Test-Path $csvPath) {
         $existingUser = Get-ADUser -Filter { (GivenName -eq $firstName) -and (Surname -eq $lastName) } -ErrorAction SilentlyContinue
 
         if ($existingUser -eq $null) {
-            # Create a new user in Active Directory in the specified OU
+            # Create a new user in Active Directory in the specified OU with a temporary password
             try {
-                New-ADUser -Name "$firstName $lastName" -GivenName $firstName -Surname $lastName -UserPrincipalName "$firstName.$lastName@CDB.lan" -SamAccountName $firstName -Enabled $true -Path $ouPath -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) -ErrorAction Stop
+                New-ADUser -Name "$firstName $lastName" -GivenName $firstName -Surname $lastName -UserPrincipalName "$firstName.$lastName@CDB.lan" -SamAccountName $firstName -Enabled $false -Path $ouPath -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) -ErrorAction Stop
 
                 # Set additional user attributes
                 Set-ADUser -Identity "$firstName $lastName" -Description $function -Department $department -Office $location -ErrorAction Stop
 
-                Write-Host "User '$firstName $lastName' created in $ouPath with the specified password."
+                # Enable the account
+                Set-ADUser -Identity "$firstName $lastName" -Enabled $true -ErrorAction Stop
+
+                # Force the user to change their password at next logon
+                Set-ADUser -Identity "$firstName $lastName" -ChangePasswordAtLogon $true -ErrorAction Stop
+
+                Write-Host "User '$firstName $lastName' created in $ouPath with a temporary password. Account enabled."
             } catch {
                 Write-Host "Error creating user '$firstName $lastName': $_"
             }
