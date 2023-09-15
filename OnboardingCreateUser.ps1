@@ -17,6 +17,7 @@ if (Test-Path $csvPath) {
         $department = $user.Department
         $location = $user.Location
         $password = $user.Password
+        $jobTitle = $user.Function 
 
         # Generate the user logon name as first letter of first name + entire last name without symbols or spaces
         $logonName = ($firstName.Substring(0, 1) + $lastName) -replace '\W'
@@ -36,7 +37,7 @@ if (Test-Path $csvPath) {
                 New-ADUser -Name "$firstName $lastName" -GivenName $firstName -Surname $lastName -UserPrincipalName "$logonName@CDB.lan" -SamAccountName $logonName -Enabled $true -Path $ouPath -AccountPassword (ConvertTo-SecureString -AsPlainText $password -Force) -ErrorAction Stop
 
                 # Set additional user attributes
-                Set-ADUser -Identity $logonName -Description $function -Department $department -Office $location -ErrorAction Stop
+                Set-ADUser -Identity $logonName -Description $function -Department $department -Office $location -Title $jobTitle -ErrorAction Stop
             } catch {
                 # Handle errors as needed
             }
