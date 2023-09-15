@@ -9,6 +9,9 @@ if (Test-Path $csvPath) {
     # Read the CSV file
     $userList = Import-Csv $csvPath
 
+    # Create an array to store users that were successfully created
+    $createdUsers = @()
+
     # Loop through each user in the CSV
     foreach ($user in $userList) {
         $firstName = $user.Firstname
@@ -69,18 +72,18 @@ if (Test-Path $csvPath) {
                 elseif ($function -eq "IT Trainee") {
                     Add-ADGroupMember -Identity "IT_SupportTrainee" -Members $logonName
                 }
+
+                # Add the user to the list of successfully created users
+                $createdUsers += $user
             } catch {
                 # Handle errors as needed
             }
-
-            # Enable the account using SamAccountName
-            Enable-ADAccount -Identity $logonName
-
-            # Set the pre-Windows 2000 logon name to match the user logon name
-            Set-ADUser -Identity $logonName -SamAccountName $logonName -ErrorAction Stop
-
-            # Set the "User must change password upon next logon" option
-            Set-ADUser -Identity $logonName -ChangePasswordAtLogon $true -ErrorAction Stop
         }
     }
+
+    # Remove the successfully created users from the CSV
+    $userList = $userList | Where-Object { $createdUsers -notcontains $_ }
+
+    # Export the updated CSV without the successfully created users
+    $userList | Export-Csv $csvPath -NoTypeInformation
 }
