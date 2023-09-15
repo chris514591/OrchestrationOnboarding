@@ -82,5 +82,8 @@ if (Test-Path $csvPath) {
             # Set the "User must change password upon next logon" option
             Set-ADUser -Identity $logonName -ChangePasswordAtLogon $true -ErrorAction Stop
         }
+        else {
+            Write-Host "User $logonName already exists. Skipping."
+        }
     }
 }
