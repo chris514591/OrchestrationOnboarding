@@ -86,4 +86,8 @@ if (Test-Path $csvPath) {
 
     # Export the updated CSV without the successfully created users
     $userList | Export-Csv $csvPath -NoTypeInformation
+
+    # Create a new CSV file with the old contents
+    $newCsvFileName = "NewHires_$(Get-Date -Format 'yyyyMMddHHmmss').csv"
+    $userList | Export-Csv "S:\Fileshare\HR\$newCsvFileName" -NoTypeInformation
 }
