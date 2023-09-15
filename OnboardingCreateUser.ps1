@@ -38,6 +38,29 @@ if (Test-Path $csvPath) {
 
                 # Set additional user attributes
                 Set-ADUser -Identity $logonName -Description $function -Department $department -Office $location -Title $jobTitle -ErrorAction Stop
+
+                # Add users to groups based on their function
+                if ($function -eq "IT Employee") {
+                    Add-ADGroupMember -Identity "IT_Department" -Members $logonName, "IT_Support"
+                }
+                elseif ($function -eq "IT Infrastructure") {
+                    Add-ADGroupMember -Identity "IT_Department" -Members $logonName, "IT_Infrastructure"
+                }
+                elseif ($function -eq "IT Cybersecurity") {
+                    Add-ADGroupMember -Identity "IT_Department" -Members $logonName, "IT_Security"
+                }
+                elseif ($function -eq "HR Employee") {
+                    Add-ADGroupMember -Identity "HR_Department" -Members $logonName, "HR_Employee"
+                }
+                elseif ($function -eq "HR Advisor") {
+                    Add-ADGroupMember -Identity "HR_Department" -Members $logonName, "HR_Advisor"
+                }
+                elseif ($function -eq "HR Trainee") {
+                    Add-ADGroupMember -Identity "HR_Department" -Members $logonName, "HR_Trainee"
+                }
+                elseif ($function -eq "IT Trainee") {
+                    Add-ADGroupMember -Identity "IT_Department" -Members $logonName, "IT_SupportTrainee"
+                }
             } catch {
                 # Handle errors as needed
             }
