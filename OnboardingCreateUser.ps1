@@ -39,27 +39,35 @@ if (Test-Path $csvPath) {
                 # Set additional user attributes
                 Set-ADUser -Identity $logonName -Description $function -Department $department -Office $location -Title $jobTitle -ErrorAction Stop
 
+                # Add users to their department group (HR_Department or IT_Department)
+                if ($department -eq "HR") {
+                    Add-ADGroupMember -Identity "HR_Department" -Members $logonName
+                }
+                elseif ($department -eq "IT") {
+                    Add-ADGroupMember -Identity "IT_Department" -Members $logonName
+                }
+
                 # Add users to groups based on their function
                 if ($function -eq "IT Employee") {
-                    Add-ADGroupMember -Identity "IT_Department" -Members $logonName, "IT_Support"
+                    Add-ADGroupMember -Identity "IT_Support" -Members $logonName
                 }
                 elseif ($function -eq "IT Infrastructure") {
-                    Add-ADGroupMember -Identity "IT_Department" -Members $logonName, "IT_Infrastructure"
+                    Add-ADGroupMember -Identity "IT_Infrastructure" -Members $logonName
                 }
                 elseif ($function -eq "IT Cybersecurity") {
-                    Add-ADGroupMember -Identity "IT_Department" -Members $logonName, "IT_Security"
+                    Add-ADGroupMember -Identity "IT_Security" -Members $logonName
                 }
                 elseif ($function -eq "HR Employee") {
-                    Add-ADGroupMember -Identity "HR_Department" -Members $logonName, "HR_Employee"
+                    Add-ADGroupMember -Identity "HR_Employee" -Members $logonName
                 }
                 elseif ($function -eq "HR Advisor") {
-                    Add-ADGroupMember -Identity "HR_Department" -Members $logonName, "HR_Advisor"
+                    Add-ADGroupMember -Identity "HR_Advisor" -Members $logonName
                 }
                 elseif ($function -eq "HR Trainee") {
-                    Add-ADGroupMember -Identity "HR_Department" -Members $logonName, "HR_Trainee"
+                    Add-ADGroupMember -Identity "HR_Trainee" -Members $logonName
                 }
                 elseif ($function -eq "IT Trainee") {
-                    Add-ADGroupMember -Identity "IT_Department" -Members $logonName, "IT_SupportTrainee"
+                    Add-ADGroupMember -Identity "IT_SupportTrainee" -Members $logonName
                 }
             } catch {
                 # Handle errors as needed
