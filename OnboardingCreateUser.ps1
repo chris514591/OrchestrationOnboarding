@@ -4,6 +4,14 @@ Import-Module ActiveDirectory
 # Define the path to the CSV file containing user information
 $csvPath = "S:\Fileshare\HR\NewHires.csv"
 
+# Kasm Workspaces API credentials
+$apiKey = "7fUH9ZV9HvWv"
+$apiSecret = "Zb7iiChJVyFWNSuQwYdcAGHypV2oCU7g"
+$apiEndpoint = "https://172.16.1.21/api/public/create_user"  # Updated API endpoint URL
+
+# Bypass SSL/TLS certificate checks (for debugging/testing purposes)
+[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+
 # Check if the CSV file exists
 if (Test-Path $csvPath) {
     # Read the CSV file
@@ -17,7 +25,7 @@ if (Test-Path $csvPath) {
         $department = $user.Department
         $location = $user.Location
         $password = $user.Password
-        $jobTitle = $user.Function 
+        $jobTitle = $user.Function
 
         # Generate the user logon name as first letter of first name + entire last name without symbols or spaces
         $logonName = ($firstName.Substring(0, 1) + $lastName) -replace '\W'
@@ -69,21 +77,58 @@ if (Test-Path $csvPath) {
                 elseif ($function -eq "IT Trainee") {
                     Add-ADGroupMember -Identity "IT_SupportTrainee" -Members $logonName
                 }
-            } catch {
-                # Handle errors as needed
+
+                # Enable the account using SamAccountName
+                Enable-ADAccount -Identity $logonName
+
+                # Set the pre-Windows 2000 logon name to match the user logon name
+                Set-ADUser -Identity $logonName -SamAccountName $logonName -ErrorAction Stop
+
+                # Set the "User must change password upon next logon" option
+                Set-ADUser -Identity $logonName -ChangePasswordAtLogon $true -ErrorAction Stop
+
+                # Create the user in Kasm Workspaces
+                $kasmUserParams = @{
+                    "api_key" = $apiKey
+                    "api_key_secret" = $apiSecret
+                    "target_user" = @{
+                        "username" = $logonName
+                        "first_name" = $firstName
+                        "last_name" = $lastName
+                        "locked" = $false
+                        "disabled" = $false
+                        "organization" = "CDB"  # You can modify this as needed
+                        "phone" = ""  # Provide the phone number if needed
+                        "password" = $password
+                    }
+                }
+
+                # Convert the user data to JSON format
+                $kasmUserParamsJson = $kasmUserParams | ConvertTo-Json
+
+                # Make the API request to create the user in Kasm Workspaces
+                $kasmHeaders = @{
+                    "Content-Type" = "application/json"
+                }
+                $kasmResponse = Invoke-RestMethod -Uri $apiEndpoint -Method Post -Headers $kasmHeaders -Body $kasmUserParamsJson
+
+                # Check the Kasm Workspaces API response and handle errors as needed
+                if ($kasmResponse -eq "success") {
+                    Write-Host "User $($logonName) successfully created in Active Directory and Kasm Workspaces."
+                }
+                else {
+                    Write-Host "Failed to create user $($logonName) in Kasm Workspaces."
+                }
             }
-
-            # Enable the account using SamAccountName
-            Enable-ADAccount -Identity $logonName
-
-            # Set the pre-Windows 2000 logon name to match the user logon name
-            Set-ADUser -Identity $logonName -SamAccountName $logonName -ErrorAction Stop
-
-            # Set the "User must change password upon next logon" option
-            Set-ADUser -Identity $logonName -ChangePasswordAtLogon $true -ErrorAction Stop
+            catch {
+                Write-Host "Error creating user $($logonName): $_"
+            }
         }
         else {
-            Write-Host "User $logonName already exists. Skipping."
+            Write-Host "User $($logonName) already exists in Active Directory. Skipping."
         }
     }
+}
+else {
+    Write-Host "CSV file not found at $csvPath."
 }
