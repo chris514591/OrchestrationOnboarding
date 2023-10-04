@@ -113,7 +113,7 @@ if (Test-Path $csvPath) {
                 $kasmResponse = Invoke-RestMethod -Uri $apiEndpoint -Method Post -Headers $kasmHeaders -Body $kasmUserParamsJson
 
                 # Check the Kasm Workspaces API response
-                if ($kasmResponse -eq "success") {
+                if ($kasmResponse.user -ne $null) {
                     Write-Host "User $($logonName) successfully created in Active Directory and Kasm Workspaces."
                 }
                 else {
