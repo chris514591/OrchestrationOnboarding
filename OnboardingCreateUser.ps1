@@ -112,11 +112,15 @@ if (Test-Path $csvPath) {
                 }
                 $kasmResponse = Invoke-RestMethod -Uri $apiEndpoint -Method Post -Headers $kasmHeaders -Body $kasmUserParamsJson
 
-                # Check the Kasm Workspaces API response and handle errors as needed
+                # Check the Kasm Workspaces API response
                 if ($kasmResponse -eq "success") {
                     Write-Host "User $($logonName) successfully created in Active Directory and Kasm Workspaces."
                 }
                 else {
+                    # Print the API response for debugging purposes
+                    Write-Host "Kasm Workspaces API Response: $kasmResponse"
+
+                    # Handle the error
                     Write-Host "Failed to create user $($logonName) in Kasm Workspaces."
                 }
             }
