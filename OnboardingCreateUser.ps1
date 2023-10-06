@@ -115,6 +115,39 @@ if (Test-Path $csvPath) {
                 # Check the Kasm Workspaces API response
                 if ($kasmResponse.user -ne $null) {
                     Write-Host "User $($logonName) successfully created in Active Directory and Kasm Workspaces."
+                    
+                    # Add users to Kasm Workspaces group based on department
+                    if ($department -eq "HR") {
+                        $kasmGroupID = "4fe87536aff147a3bf63262aa5e65ee9" # HR group ID
+                    }
+                    elseif ($department -eq "IT") {
+                        $kasmGroupID = "7c90498778eb4dde82cc9c1f55b99976" # IT group ID
+                    }
+
+                    $kasmAddGroupParams = @{
+                        "api_key" = $apiKey
+                        "api_key_secret" = $apiSecret
+                        "target_user" = @{
+                            "user_id" = $kasmResponse.user.user_id
+                        }
+                        "target_group" = @{
+                            "group_id" = $kasmGroupID
+                        }
+                    }
+
+                    # Convert the add to group data to JSON format
+                    $kasmAddGroupParamsJson = $kasmAddGroupParams | ConvertTo-Json
+
+                    # Make the API request to add the user to the Kasm Workspaces group
+                    $kasmAddGroupResponse = Invoke-RestMethod -Uri "https://172.16.1.21/api/public/add_user_group" -Method Post -Headers $kasmHeaders -Body $kasmAddGroupParamsJson
+
+                    # Check the Kasm Workspaces API response for adding to group
+                    if ($kasmAddGroupResponse -ne $null) {
+                        Write-Host "User $($logonName) added to Kasm Workspaces group."
+                    }
+                    else {
+                        Write-Host "Failed to add user $($logonName) to Kasm Workspaces group."
+                    }
                 }
                 else {
                     # Print the API response for debugging purposes
