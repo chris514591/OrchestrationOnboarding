@@ -62,7 +62,7 @@ if (Test-Path $csvPath) {
                 elseif ($function -eq "IT Infrastructure") {
                     Add-ADGroupMember -Identity "IT_Infrastructure" -Members $logonName
                 }
-                elseif ($function -eq "IT Cybersecurity") {
+                elseif ($function -eq "IT Security") {
                     Add-ADGroupMember -Identity "IT_Security" -Members $logonName
                 }
                 elseif ($function -eq "HR Employee") {
