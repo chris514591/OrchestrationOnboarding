@@ -4,8 +4,10 @@ Import-Module ActiveDirectory
 # Define the path to the CSV file containing user information
 $csvPath = "S:\Fileshare\HR\NewHires.csv"
 
-# Load the API Key and Secret from the config file
+# Define the path to the JSON configuration file
 $configPath = "C:\onboardingconfig.json"
+
+# Load the API Key and Secret from the config file
 if (Test-Path $configPath) {
     $configData = Get-Content $configPath | ConvertFrom-Json
     $apiKey = $configData.apiKey
